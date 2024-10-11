@@ -1,0 +1,35 @@
+.progress {
+    --progress-value: 0.3243;
+    --color: hsl(
+      calc(240 * (1 - var(--progress-value))),
+      100%,
+      calc(30% + 20% * var(--progress-value))
+    );
+  }
+  circle-progress {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    padding: 1em;
+  }
+  
+  circle-progress::part(base) {
+    width: 100%;
+    height: 100%;
+  }
+  circle-progress::part(value) {
+    stroke-width: 1em;
+    stroke: var(--color);
+    stroke-dasharray: 5.98 2;
+    transition: stroke 0s;
+  }
+  circle-progress::part(circle) {
+    stroke-width: 0.5em;
+    stroke: hsl(0, 0%, 19%);
+  }
+  circle-progress::part(text) {
+    font-weight: bold;
+    fill: var(--color);
+  }
