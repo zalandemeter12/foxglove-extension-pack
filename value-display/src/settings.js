@@ -16,6 +16,22 @@ const fontSizes = [
   "72px",
 ].map((key) => ({ value: key, label: key }));
 
+const functions = [
+  "none",
+  "abs",
+  "ceil",
+  "floor",
+  "round",
+  "sqrt",
+  "pow2",
+  "exp",
+  "log",
+  "sin",
+  "cos",
+  "tan",
+  "1/x",
+].map((key) => ({ value: key, label: key }));
+
 const defaultSettings = {
   data: {
     label: "Data",
@@ -23,9 +39,17 @@ const defaultSettings = {
   },
   display: {
     label: "Display",
-    fontSize: "auto",
     unit: "",
+    fontSize: "30px",
+    bold: true,
+    italic: false,
+    fontColor: "#ffffff",
+    backgroundColor: "#15151A",
+  },
+  numerical: {
+    label: "Numerical",
     precision: 0,
+    function: "none",
   },
 };
 
@@ -37,7 +61,7 @@ const updateSettingsEditor = (context, state, settingsActionHandler) => {
         label: state.value.data.label,
         // renamable: true,
         // visible: state.value.data.visible,
-        icon: "Cube",
+        icon: "Settings",
         fields: {
           topic: {
             label: "Topic",
@@ -50,23 +74,57 @@ const updateSettingsEditor = (context, state, settingsActionHandler) => {
         label: state.value.display.label,
         // renamable: true,
         // visible: state.value.display.visible,
-        icon: "Display",
+        icon: "Cells",
         fields: {
+          unit: {
+            label: "Unit",
+            input: "string",
+            value: state.value.display.unit,
+          },
           fontSize: {
             label: "Font Size",
             input: "select",
             options: fontSizes,
             value: state.value.display.fontSize,
           },
-          unit: {
-            label: "Unit",
-            input: "string",
-            value: state.value.display.unit,
+          bold: {
+            label: "Bold",
+            input: "boolean",
+            value: state.value.display.bold,
           },
+          italic: {
+            label: "Italic",
+            input: "boolean",
+            value: state.value.display.italic,
+          },
+          fontColor: {
+            label: "Font Color",
+            input: "rgb",
+            value: state.value.display.fontColor,
+          },
+          backgroundColor: {
+            label: "Background Color",
+            input: "rgb",
+            value: state.value.display.backgroundColor,
+          },
+        },
+      },
+      numerical: {
+        label: state.value.numerical.label,
+        // renamable: true,
+        // visible: state.value.numerical.visible,
+        icon: "PrecisionManufacturing",
+        fields: {
           precision: {
             label: "Precision",
             input: "number",
-            value: state.value.display.precision,
+            value: state.value.numerical.precision,
+          },
+          function: {
+            label: "Function",
+            input: "select",
+            options: functions,
+            value: state.value.numerical.function,
           },
         },
       },

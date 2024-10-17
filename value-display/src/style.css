@@ -1,7 +1,13 @@
 value-display {
   display: block;
   width: 100%;
+  height: 100%;
   text-align: center;
   font-size: var(--font-size);
-  color: #ffffff;
+  font-weight: var(--font-weight);
+  font-style: var(--font-style);
+  color: var(--font-color);
+  background-color: var(--background-color);
+  padding: 0.5rem;
+  margin: 0;
 }

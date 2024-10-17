@@ -26,10 +26,10 @@ export default defineComponent({
     const currentField = ref("");
 
     const circleValue = ref(0);
-    const color = ref("hsl(0, 0%, 19%)");
+    const color = ref("#303030");
     const indeterminateText = ref("NaN");
     const textFormatFunc = ref((val) => {
-      return parseFloat(val).toFixed(state.value.display.precision) + state.value.display.unit;
+      return parseFloat(val).toFixed(state.value.display.precision < 0 ? 0 : state.value.display.precision) + state.value.display.unit;
     });
 
     const handleRender = (renderState, done) => {
@@ -51,7 +51,7 @@ export default defineComponent({
           );
         } else {
           circleValue.value = 0;
-          color.value = "hsl(0, 0%, 19%)";
+          color.value = "#303030";
         }
       }
     };
@@ -70,7 +70,7 @@ export default defineComponent({
             context.subscribe([{ topic: firstPart }]);
           } else {
             circleValue.value = 0;
-            color.value = "hsl(0, 0%, 19%)";
+            color.value = "#303030";
           }
         }
 

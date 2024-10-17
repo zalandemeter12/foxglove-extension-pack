@@ -4,7 +4,7 @@
     height: 100%;
     max-width: none;
     max-height: none;
-    padding: 0.5em;
+    padding: 0.5rem;
   }
   
   circle-progress::part(base) {
@@ -12,14 +12,14 @@
     height: 100%;
   }
   circle-progress::part(value) {
-    stroke-width: 1em;
+    stroke-width: 1rem;
     stroke: var(--color);
     stroke-dasharray: 5.98 2;
     transition: stroke 0s;
   }
   circle-progress::part(circle) {
-    stroke-width: 0.5em;
-    stroke: hsl(0, 0%, 19%);
+    stroke-width: 0.5rem;
+    stroke: #303030;
   }
   circle-progress::part(text) {
     font-size: var(--font-size);

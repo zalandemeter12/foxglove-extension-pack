@@ -94,7 +94,7 @@ const updateSettingsEditor = (context, state, settingsActionHandler) => {
         label: state.value.data.label,
         // renamable: true,
         // visible: state.value.data.visible,
-        icon: "Cube",
+        icon: "Settings",
         fields: {
           topic: {
             label: "Topic",
@@ -117,7 +117,7 @@ const updateSettingsEditor = (context, state, settingsActionHandler) => {
         label: state.value.display.label,
         // renamable: true,
         // visible: state.value.display.visible,
-        icon: "Display",
+        icon: "Cells",
         fields: {
           fontSize: {
             label: "Font Size",

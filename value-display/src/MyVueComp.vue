@@ -24,7 +24,7 @@ export default defineComponent({
     const currentTopic = ref("");
     const currentField = ref("");
 
-    const displayValue = ref("N/A" + " " + state.value.display.unit);
+    const displayValue = ref("N/A");
 
     const handleRender = (renderState, done) => {
       renderDone.value = done;
@@ -35,10 +35,53 @@ export default defineComponent({
         const deserializedMessage = messages.value[0].message;
         const value = deserializedMessage[currentField.value];
         if (value) {
-          if(typeof value === "number") {
-            displayValue.value = parseFloat(value).toFixed(state.value.display.precision) + state.value.display.unit;
-          } else {
-            displayValue.value = value + state.value.display.unit;
+          if (typeof value === "number") {
+            var fnc = (x) => x;
+            switch (state.value.numerical.function)
+            {
+              case "none":
+                break;
+              case "abs":
+                fnc = Math.abs;
+                break;
+              case "ceil":
+                fnc = Math.ceil;
+                break;
+              case "floor":
+                fnc = Math.floor;
+                break;
+              case "round":
+                fnc = Math.round;
+                break;
+              case "sqrt":
+                fnc = Math.sqrt;
+                break;
+              case "pow2":
+                fnc = (x) => Math.pow(x, 2);
+                break;
+              case "exp":
+                fnc = Math.exp;
+                break;
+              case "log":
+                fnc = Math.log;
+                break;
+              case "sin":
+                fnc = Math.sin;
+                break;
+              case "cos":
+                fnc = Math.cos;
+                break;
+              case "tan":
+                fnc = Math.tan;
+                break;
+              case "1/x":
+                fnc = (x) => 1 / x;
+                break;
+            }
+            displayValue.value = fnc(value);
+          }
+          else {
+            displayValue.value = value;
           }
         } else {
           displayValue.value = "N/A";
@@ -59,17 +102,9 @@ export default defineComponent({
             currentField.value = lastPart;
             context.subscribe([{ topic: firstPart }]);
           } else {
-            //handle case when no data
+            displayValue.value = "N/A";
           }
         }
-
-        // if (path[1] === "max") {
-          
-        // }
-
-        // if (path[1] === "min") {
-          
-        // }
       }
     };
 
@@ -104,6 +139,7 @@ export default defineComponent({
     watch(
       [state, topics],
       () => {
+        debugString.value += ".";
         updateSettingsEditor(context, state, settingsActionHandler);
         context.saveState(state.value);
       },
@@ -128,9 +164,16 @@ export default defineComponent({
   <value-display
     :style="{
       '--font-size': state.display.fontSize,
+      '--font-weight': state.display.bold ? 'bold' : 'normal',
+      '--font-style': state.display.italic ? 'italic' : 'normal',
+      '--font-color': displayValue == 'N/A' ? '#303030' : state.display.fontColor,
+      '--background-color': displayValue == 'N/A' ? '#15151A' : state.display.backgroundColor,
+
     }"
   >
-    {{ displayValue }}
+  {{ 
+  typeof displayValue === "number" ? parseFloat(displayValue).toFixed(state.numerical.precision < 0 ? 0 : state.numerical.precision) : displayValue
+  }}{{ state.display.unit }}
   </value-display>
 </template>
 
