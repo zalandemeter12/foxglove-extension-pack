@@ -37,8 +37,10 @@ const functions = [
 
 const splitTopic = (topic) => {
   const parts = topic.split('.');
-  if (parts.length < 2 || parts[1] === '') {
+  if (parts.length === 0) {
     return { firstPart: '', lastPart: '' };
+  } else if (parts.length < 2 || parts[1] === '') {
+    return { firstPart: parts[0], lastPart: '' };
   } else {
     return {
       firstPart: parts[0],
