@@ -1,11 +1,11 @@
 <script>
 import { defineComponent, ref, watch, onMounted, onBeforeUnmount } from "vue";
-import { produce } from "immer";
+import { current, produce } from "immer";
 import { set, merge } from "lodash";
 import { reactive } from "vue";
 import CircleProgress from "js-circle-progress";
 import { defaultSettings, updateSettingsEditor } from "./settings.js";
-import { splitTopic, clamp, getColorFromProgress } from "./utils.js";
+import * as common from "common";
 
 export default defineComponent({
   props: {
@@ -41,12 +41,15 @@ export default defineComponent({
       topics.value = renderState.topics || [];
       messages.value = renderState.currentFrame || [];
 
-      if (messages.value.length > 0) {
-        const deserializedMessage = messages.value[0].message;
-        const value = deserializedMessage[currentField.value];
-        if (value) {
-          circleValue.value = clamp(value, state.value.data.min, state.value.data.max);
-          color.value = getColorFromProgress(
+      if (currentField.value === undefined) {
+        circleValue.value = 0;
+        color.value = "#303030";
+      } else if (messages.value.length > 0) {
+        const value = common.parseValue(messages.value[0].message, currentField.value);
+
+        if (value !== undefined) {
+          circleValue.value = value;
+          color.value = common.getColorFromProgress(
             circleValue.value,
             state.value.data.min,
             state.value.data.max,
@@ -54,7 +57,7 @@ export default defineComponent({
             state.value.display.reverseColormap,
           );
         } else {
-          circleValue.value = undefined;
+          circleValue.value = 0;
           color.value = "#303030";
         }
       }
@@ -66,50 +69,18 @@ export default defineComponent({
         state.value = produce(state.value, (draft) => set(draft, path, value));
 
         if (path[1] === "topic") {
-          context.unsubscribeAll();
-          const { firstPart, lastPart } = splitTopic(value);
-          if (firstPart) {
-            currentTopic.value = firstPart;
-            currentField.value = lastPart;
-            context.subscribe([{ topic: firstPart }]);
-          } else {
-            circleValue.value = undefined;
-            color.value = "#303030";
-          }
+          const { firstPart, lastPart } = common.subscribeToTopic(context, value);
+          currentTopic.value = firstPart;
+          currentField.value = lastPart;
         }
 
-        if (path[1] === "max") {
-          color.value = getColorFromProgress(
-            circleValue.value,
-            state.value.data.min,
-            state.value.data.max,
-            state.value.display.colormap,
-            state.value.display.reverseColormap,
-          );
-        }
-
-        if (path[1] === "min") {
-          color.value = getColorFromProgress(
-            circleValue.value,
-            state.value.data.min,
-            state.value.data.max,
-            state.value.display.colormap,
-            state.value.display.reverseColormap,
-          );
-        }
-
-        if (path[1] === "colormap") {
-          color.value = getColorFromProgress(
-            circleValue.value,
-            state.value.data.min,
-            state.value.data.max,
-            state.value.display.colormap,
-            state.value.display.reverseColormap,
-          );
-        }
-
-        if (path[1] === "reverseColormap") {
-          color.value = getColorFromProgress(
+        if (
+          path[1] === "min" ||
+          path[1] === "max" ||
+          path[1] === "colormap" ||
+          path[1] === "reverseColormap"
+        ) {
+          color.value = common.getColorFromProgress(
             circleValue.value,
             state.value.data.min,
             state.value.data.max,
@@ -130,12 +101,9 @@ export default defineComponent({
       updateSettingsEditor(context, state, settingsActionHandler);
 
       // Initialize subscriptions
-      const { firstPart, lastPart } = splitTopic(state.value.data.topic);
-      if (firstPart) {
-        currentTopic.value = firstPart;
-        currentField.value = lastPart;
-        context.subscribe([{ topic: firstPart }]);
-      }
+      const { firstPart, lastPart } = common.subscribeToTopic(context, state.value.data.topic);
+      currentTopic.value = firstPart;
+      currentField.value = lastPart;
     });
 
     watch(
@@ -147,6 +115,18 @@ export default defineComponent({
         }
       },
     );
+
+    // watch(currentField, (newValue) => {
+    //   if (newValue == null) {
+    //     circleValue.value = 0;
+    //     color.value = "#303030";
+    //   }
+    // });
+
+    watch([currentField, currentTopic], ([newField, newTopic]) => {
+      circleValue.value = 0;
+      color.value = "#303030";
+    });
 
     watch(
       [state, topics],
@@ -178,7 +158,7 @@ export default defineComponent({
   <circle-progress
     class="progress"
     :value="isNaN(circleValue) || circleValue === undefined ? undefined : circleValue"
-    :max="isNaN(state.data.max) ? 100 : state.data.max"
+    :max="isNaN(state.data.max) ? 0 : state.data.max"
     :min="isNaN(state.data.min) ? 0 : state.data.min"
     :textFormat="textFormatFunc"
     :startAngle="isNaN(state.display.startAngle) ? 0 : state.display.startAngle"
@@ -187,8 +167,9 @@ export default defineComponent({
       '--font-size': state.display.fontSize === 'auto' ? '1.35rem' : state.display.fontSize,
       '--color': color,
     }"
-    animationDuration="250"
+    animationDuration="0"
     :indeterminateText="indeterminateText"
+    :unconstrained="!state.data.clamp"
   ></circle-progress>
 </template>
 

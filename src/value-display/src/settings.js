@@ -1,36 +1,4 @@
-const fontSizes = [
-  "auto",
-  "8px",
-  "9px",
-  "10px",
-  "11px",
-  "12px",
-  "14px",
-  "16px",
-  "18px",
-  "24px",
-  "30px",
-  "36px",
-  "48px",
-  "60px",
-  "72px",
-].map((key) => ({ value: key, label: key }));
-
-const functions = [
-  "none",
-  "abs",
-  "ceil",
-  "floor",
-  "round",
-  "sqrt",
-  "pow2",
-  "exp",
-  "log",
-  "sin",
-  "cos",
-  "tan",
-  "1/x",
-].map((key) => ({ value: key, label: key }));
+import { fontSizes, functions } from "common";
 
 const defaultSettings = {
   data: {

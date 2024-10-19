@@ -4,7 +4,7 @@
   "include": ["./src/**/*", "./node_modules/@foxglove/extension/src/**/*"],
   "exclude": ["./dist", "./node_modules"],
   "compilerOptions": {
-    "rootDir": ".",  // Set to the root of your project
+    "rootDir": "../..",  // Set to the root of your project
     "outDir": "./dist",
     "lib": ["dom"],
 

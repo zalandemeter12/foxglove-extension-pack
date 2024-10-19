@@ -26,7 +26,7 @@ const getColorFromProgress = (x, min, max, colormap, reversed) => {
     const [r, g, b] = cmap(norm);
     return `rgb(${r}, ${g}, ${b})`;
   } else {
-    return "#303030";
+    return "hsl(0, 0%, 19%)";
   }
 };
 

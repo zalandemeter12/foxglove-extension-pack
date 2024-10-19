@@ -73,6 +73,7 @@ const defaultSettings = {
     topic: "",
     min: 0,
     max: 100,
+    clamp: false,
   },
   display: {
     label: "Display",
@@ -110,6 +111,11 @@ const updateSettingsEditor = (context, state, settingsActionHandler) => {
             label: "Max",
             input: "number",
             value: state.value.data.max,
+          },
+          clamp: {
+            label: "Clamp",
+            input: "boolean",
+            value: state.value.data.clamp,
           },
         },
       },

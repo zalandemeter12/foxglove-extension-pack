@@ -4,7 +4,7 @@ import { produce } from "immer";
 import { set, merge } from "lodash";
 import { reactive } from "vue";
 import { defaultSettings, updateSettingsEditor } from "./settings.js";
-import { splitTopic } from "./utils.js";
+import * as common from "common";
 import seedrandom from "seedrandom";
 
 export default defineComponent({
@@ -26,92 +26,28 @@ export default defineComponent({
     const currentField = ref("");
 
     const displayValue = ref("N/A");
+    const width = ref(0);
     const height = ref(0);
 
-    // Seed the random number generator with timestamp
-    seedrandom(new Date().getTime(), { global: true });
-    //generate 32 random characters
-    const randomString = ref(
-      Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
-    );
-
-    randomString.value += document.getElementsByClassName("value-display").length;
+    const randomDivClass = common.generateRandomDivClass("value-display");
 
     const handleRender = (renderState, done) => {
       renderDone.value = done;
       topics.value = renderState.topics || [];
       messages.value = renderState.currentFrame || [];
 
-      if (messages.value.length > 0) {
-        const deserializedMessage = messages.value[0].message;
-        const value = deserializedMessage[currentField.value];
-        if (value) {
-          if (typeof value === "number") {
-            var fnc = (x) => x;
-            switch (state.value.numerical.function) {
-              case "none":
-                break;
-              case "abs":
-                fnc = Math.abs;
-                break;
-              case "ceil":
-                fnc = Math.ceil;
-                break;
-              case "floor":
-                fnc = Math.floor;
-                break;
-              case "round":
-                fnc = Math.round;
-                break;
-              case "sqrt":
-                fnc = Math.sqrt;
-                break;
-              case "pow2":
-                fnc = (x) => Math.pow(x, 2);
-                break;
-              case "exp":
-                fnc = Math.exp;
-                break;
-              case "log":
-                fnc = Math.log;
-                break;
-              case "sin":
-                fnc = Math.sin;
-                break;
-              case "cos":
-                fnc = Math.cos;
-                break;
-              case "tan":
-                fnc = Math.tan;
-                break;
-              case "1/x":
-                fnc = (x) => 1 / x;
-                break;
-            }
-            displayValue.value = fnc(value);
-          } else {
-            displayValue.value = value;
-          }
+      if (currentField.value === undefined) {
+        displayValue.value = "N/A";
+      } else if (messages.value.length > 0) {
+        const value = common.parseValue(messages.value[0].message, currentField.value);
+        if (value !== undefined) {
+          displayValue.value = common.applyFunction(value, state.value.numerical.function);
         } else {
           displayValue.value = "N/A";
         }
       }
 
-      const elements = document.getElementsByClassName(randomString.value);
-
-      if (elements.length > 0) {
-        const element = elements[0]; // Get the first element with the class name
-
-        const resizeObserver = new ResizeObserver((entries) => {
-          for (let entry of entries) {
-            // const width = entry.contentRect.width;
-            height.value = entry.contentRect.height;
-          }
-        });
-
-        // Start observing the element for size changes
-        resizeObserver.observe(element);
-      }
+      common.getWidthHeight(width, height, randomDivClass);
     };
 
     const settingsActionHandler = (action) => {
@@ -120,15 +56,9 @@ export default defineComponent({
         state.value = produce(state.value, (draft) => set(draft, path, value));
 
         if (path[1] === "topic") {
-          context.unsubscribeAll();
-          const { firstPart, lastPart } = splitTopic(value);
-          if (firstPart) {
-            currentTopic.value = firstPart;
-            currentField.value = lastPart;
-            context.subscribe([{ topic: firstPart }]);
-          } else {
-            displayValue.value = "N/A";
-          }
+          const { firstPart, lastPart } = common.subscribeToTopic(context, value);
+          currentTopic.value = firstPart;
+          currentField.value = lastPart;
         }
       }
     };
@@ -143,12 +73,9 @@ export default defineComponent({
       updateSettingsEditor(context, state, settingsActionHandler);
 
       // Initialize subscriptions
-      const { firstPart, lastPart } = splitTopic(state.value.data.topic);
-      if (firstPart) {
-        currentTopic.value = firstPart;
-        currentField.value = lastPart;
-        context.subscribe([{ topic: firstPart }]);
-      }
+      const { firstPart, lastPart } = common.subscribeToTopic(context, state.value.data.topic);
+      currentTopic.value = firstPart;
+      currentField.value = lastPart;
     });
 
     watch(
@@ -160,6 +87,16 @@ export default defineComponent({
         }
       },
     );
+
+    // watch(currentField, (newValue) => {
+    //   if (newValue == null) {
+    //     displayValue.value = "N/A";
+    //   }
+    // });
+
+    watch([currentField, currentTopic], ([newField, newTopic]) => {
+      displayValue.value = "N/A";
+    });
 
     watch(
       [state, topics],
@@ -179,7 +116,7 @@ export default defineComponent({
       debugString,
       state,
       displayValue,
-      randomString,
+      randomDivClass,
       height,
     };
   },
@@ -188,7 +125,7 @@ export default defineComponent({
 
 <template>
   <value-display
-    :class="randomString + ' value-display'"
+    :class="randomDivClass + ' value-display'"
     :style="{
       '--font-size':
         state.display.fontSize === 'auto' ? (height / 50) * 1.5 + 'rem' : state.display.fontSize,

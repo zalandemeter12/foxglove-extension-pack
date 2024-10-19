@@ -3,7 +3,7 @@ setlocal enabledelayedexpansion
 
 REM Define targets array
 set targets=circular-gauge value-display
-@REM set targets=value-display
+@REM set targets=circular-gauge
 
 REM Save the current directory
 set orig_dir=%cd%
