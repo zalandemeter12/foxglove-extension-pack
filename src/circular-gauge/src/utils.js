@@ -12,17 +12,21 @@ const splitTopic = (topic) => {
   }
 };
 
-const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
-
+const clamp = (value, min, max) => {
+  if (isNaN(value) || isNaN(min) || isNaN(max)) {
+    return 0;
+  }
+  return Math.min(Math.max(value, min), max);
+};
 const getColorFromProgress = (x, min, max, colormap, reversed) => {
-  if (!isNaN(x)) {
+  if (!isNaN(x) || isNaN(min) || isNaN(max)) {
     const norm = clamp((x - min) / (max - min), 0, 1);
     const cmap_name = reversed ? `${colormap}_r` : colormap;
     const cmap = get_cmap(cmap_name);
     const [r, g, b] = cmap(norm);
     return `rgb(${r}, ${g}, ${b})`;
   } else {
-    return "hsl(0, 0%, 19%)";
+    return "#303030";
   }
 };
 

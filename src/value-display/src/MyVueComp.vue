@@ -5,6 +5,7 @@ import { set, merge } from "lodash";
 import { reactive } from "vue";
 import { defaultSettings, updateSettingsEditor } from "./settings.js";
 import { splitTopic } from "./utils.js";
+import seedrandom from "seedrandom";
 
 export default defineComponent({
   props: {
@@ -25,6 +26,16 @@ export default defineComponent({
     const currentField = ref("");
 
     const displayValue = ref("N/A");
+    const height = ref(0);
+
+    // Seed the random number generator with timestamp
+    seedrandom(new Date().getTime(), { global: true });
+    //generate 32 random characters
+    const randomString = ref(
+      Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+    );
+
+    randomString.value += document.getElementsByClassName("value-display").length;
 
     const handleRender = (renderState, done) => {
       renderDone.value = done;
@@ -37,8 +48,7 @@ export default defineComponent({
         if (value) {
           if (typeof value === "number") {
             var fnc = (x) => x;
-            switch (state.value.numerical.function)
-            {
+            switch (state.value.numerical.function) {
               case "none":
                 break;
               case "abs":
@@ -79,13 +89,28 @@ export default defineComponent({
                 break;
             }
             displayValue.value = fnc(value);
-          }
-          else {
+          } else {
             displayValue.value = value;
           }
         } else {
           displayValue.value = "N/A";
         }
+      }
+
+      const elements = document.getElementsByClassName(randomString.value);
+
+      if (elements.length > 0) {
+        const element = elements[0]; // Get the first element with the class name
+
+        const resizeObserver = new ResizeObserver((entries) => {
+          for (let entry of entries) {
+            // const width = entry.contentRect.width;
+            height.value = entry.contentRect.height;
+          }
+        });
+
+        // Start observing the element for size changes
+        resizeObserver.observe(element);
       }
     };
 
@@ -139,7 +164,6 @@ export default defineComponent({
     watch(
       [state, topics],
       () => {
-        debugString.value += ".";
         updateSettingsEditor(context, state, settingsActionHandler);
         context.saveState(state.value);
       },
@@ -155,6 +179,8 @@ export default defineComponent({
       debugString,
       state,
       displayValue,
+      randomString,
+      height,
     };
   },
 });
@@ -162,18 +188,24 @@ export default defineComponent({
 
 <template>
   <value-display
+    :class="randomString + ' value-display'"
     :style="{
-      '--font-size': state.display.fontSize,
+      '--font-size':
+        state.display.fontSize === 'auto' ? (height / 50) * 1.5 + 'rem' : state.display.fontSize,
       '--font-weight': state.display.bold ? 'bold' : 'normal',
       '--font-style': state.display.italic ? 'italic' : 'normal',
-      '--font-color': displayValue == 'N/A' ? '#303030' : state.display.fontColor,
-      '--background-color': displayValue == 'N/A' ? '#15151A' : state.display.backgroundColor,
-
+      '--font-color': displayValue === 'N/A' ? '#303030' : state.display.fontColor,
+      '--background-color': displayValue === 'N/A' ? '#15151A' : state.display.backgroundColor,
+      '--text-align': state.display.align,
     }"
   >
-  {{ 
-  typeof displayValue === "number" ? parseFloat(displayValue).toFixed(state.numerical.precision < 0 ? 0 : state.numerical.precision) : displayValue
-  }}{{ state.display.unit }}
+    {{
+      typeof displayValue === "number"
+        ? parseFloat(displayValue).toFixed(
+            state.numerical.precision < 0 ? 0 : state.numerical.precision,
+          )
+        : displayValue
+    }}{{ state.display.unit }}
   </value-display>
 </template>
 

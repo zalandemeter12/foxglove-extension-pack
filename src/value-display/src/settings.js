@@ -40,7 +40,8 @@ const defaultSettings = {
   display: {
     label: "Display",
     unit: "",
-    fontSize: "30px",
+    fontSize: "auto",
+    align: "center",
     bold: true,
     italic: false,
     fontColor: "#ffffff",
@@ -86,6 +87,16 @@ const updateSettingsEditor = (context, state, settingsActionHandler) => {
             input: "select",
             options: fontSizes,
             value: state.value.display.fontSize,
+          },
+          align: {
+            label: "Align",
+            input: "toggle",
+            options: [
+              { value: "left", label: "Left" },
+              { value: "center", label: "Center" },
+              { value: "right", label: "Right" },
+            ],
+            value: state.value.display.align,
           },
           bold: {
             label: "Bold",

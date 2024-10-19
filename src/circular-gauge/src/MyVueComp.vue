@@ -25,11 +25,15 @@ export default defineComponent({
     const currentTopic = ref("");
     const currentField = ref("");
 
-    const circleValue = ref(0);
+    const circleValue = ref(undefined);
     const color = ref("#303030");
-    const indeterminateText = ref("NaN");
+    const indeterminateText = ref("N/A");
     const textFormatFunc = ref((val) => {
-      return parseFloat(val).toFixed(state.value.display.precision < 0 ? 0 : state.value.display.precision) + state.value.display.unit;
+      return isNaN(val) || val === undefined
+        ? indeterminateText.value
+        : parseFloat(val).toFixed(
+            state.value.display.precision < 0 ? 0 : state.value.display.precision,
+          ) + state.value.display.unit;
     });
 
     const handleRender = (renderState, done) => {
@@ -40,7 +44,7 @@ export default defineComponent({
       if (messages.value.length > 0) {
         const deserializedMessage = messages.value[0].message;
         const value = deserializedMessage[currentField.value];
-        if (!isNaN(value)) {
+        if (value) {
           circleValue.value = clamp(value, state.value.data.min, state.value.data.max);
           color.value = getColorFromProgress(
             circleValue.value,
@@ -50,7 +54,7 @@ export default defineComponent({
             state.value.display.reverseColormap,
           );
         } else {
-          circleValue.value = 0;
+          circleValue.value = undefined;
           color.value = "#303030";
         }
       }
@@ -69,7 +73,7 @@ export default defineComponent({
             currentField.value = lastPart;
             context.subscribe([{ topic: firstPart }]);
           } else {
-            circleValue.value = 0;
+            circleValue.value = undefined;
             color.value = "#303030";
           }
         }
@@ -173,14 +177,14 @@ export default defineComponent({
 <template>
   <circle-progress
     class="progress"
-    :value="circleValue"
-    :max="state.data.max"
-    :min="state.data.min"
+    :value="isNaN(circleValue) || circleValue === undefined ? undefined : circleValue"
+    :max="isNaN(state.data.max) ? 100 : state.data.max"
+    :min="isNaN(state.data.min) ? 0 : state.data.min"
     :textFormat="textFormatFunc"
-    :startAngle="state.display.startAngle"
+    :startAngle="isNaN(state.display.startAngle) ? 0 : state.display.startAngle"
     :anticlockwise="state.display.anticlockwise"
     :style="{
-      '--font-size': state.display.fontSize,
+      '--font-size': state.display.fontSize === 'auto' ? '1.35rem' : state.display.fontSize,
       '--color': color,
     }"
     animationDuration="250"
