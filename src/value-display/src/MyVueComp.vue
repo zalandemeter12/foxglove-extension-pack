@@ -88,12 +88,6 @@ export default defineComponent({
       },
     );
 
-    // watch(currentField, (newValue) => {
-    //   if (newValue == null) {
-    //     displayValue.value = "N/A";
-    //   }
-    // });
-
     watch([currentField, currentTopic], ([newField, newTopic]) => {
       displayValue.value = "N/A";
     });

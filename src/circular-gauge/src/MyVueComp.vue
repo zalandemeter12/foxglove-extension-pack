@@ -47,7 +47,7 @@ export default defineComponent({
       } else if (messages.value.length > 0) {
         const value = common.parseValue(messages.value[0].message, currentField.value);
 
-        if (value !== undefined) {
+        if (value !== undefined && !isNaN(value) && typeof value === "number") {
           circleValue.value = value;
           color.value = common.getColorFromProgress(
             circleValue.value,
@@ -115,13 +115,6 @@ export default defineComponent({
         }
       },
     );
-
-    // watch(currentField, (newValue) => {
-    //   if (newValue == null) {
-    //     circleValue.value = 0;
-    //     color.value = "#303030";
-    //   }
-    // });
 
     watch([currentField, currentTopic], ([newField, newTopic]) => {
       circleValue.value = 0;
