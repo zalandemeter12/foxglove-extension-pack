@@ -1,11 +1,11 @@
 {
-  "name": "myExtensionName",
-  "displayName": "myExtensionName",
-  "description": "",
-  "publisher": "unknown",
-  "homepage": "",
-  "version": "0.0.0",
-  "license": "UNLICENSED",
+  "name": "vue-example-panel",
+  "displayName": "vue-example-panel",
+  "description": "A Vue.js example panel for Foxglove Studio.",
+  "publisher": "Zalán Demeter",
+  "homepage": "https://github.com/zalandemeter12/foxglove-extension-pack",
+  "version": "1.0.0",
+  "license": "MIT",
   "main": "./dist/extension.js",
   "keywords": [],
   "scripts": {
