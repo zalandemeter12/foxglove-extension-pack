@@ -2,16 +2,15 @@
 set -e
 
 # Define targets array
-targets=("circular-gauge" "value-display")
-# targets=("circular-gauge")
+targets=("common" "circular-gauge" "value-display")
 
 # Save the current directory
 orig_dir=$(pwd)
 
 # Loop through each target
 for t in "${targets[@]}"; do
-    echo "Building $t..."
+    echo "Installing dependencies for $t..."
     cd src/$t
-    npm run local-install
+    npm install
     cd $orig_dir
 done
