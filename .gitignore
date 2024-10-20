@@ -46,7 +46,6 @@ Thumbs.db
 **/lib/
 
 # IDE/Editor directories and files
-**/.vscode/
 **/.idea/
 **/*.sublime-workspace
 **/*.sublime-project
