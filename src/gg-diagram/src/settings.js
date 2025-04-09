@@ -71,19 +71,13 @@ const defaultSettings = {
   data: {
     label: "Data",
     topic: "",
-    min: 0,
-    max: 100,
-    clamp: false,
+    max: 3,
+    input: "g",
   },
   display: {
     label: "Display",
     fontSize: "auto",
-    unit: "°C",
     precision: 0,
-    startAngle: 0,
-    anticlockwise: false,
-    colormap: "turbo",
-    reverseColormap: false,
   },
 };
 
@@ -102,20 +96,19 @@ const updateSettingsEditor = (context, state, settingsActionHandler) => {
             input: "messagepath",
             value: state.value.data.topic,
           },
-          min: {
-            label: "Min",
-            input: "number",
-            value: state.value.data.min,
-          },
           max: {
             label: "Max",
             input: "number",
             value: state.value.data.max,
           },
-          clamp: {
-            label: "Clamp",
-            input: "boolean",
-            value: state.value.data.clamp,
+          input: {
+            label: "Input",
+            input: "toggle",
+            options: [
+              { value: "g", label: "g" },
+              { value: "m/s2", label: "m/s2" },
+            ],
+            value: state.value.data.input,
           },
         },
       },
@@ -131,36 +124,10 @@ const updateSettingsEditor = (context, state, settingsActionHandler) => {
             options: fontSizes,
             value: state.value.display.fontSize,
           },
-          unit: {
-            label: "Unit",
-            input: "string",
-            value: state.value.display.unit,
-          },
           precision: {
             label: "Precision",
             input: "number",
             value: state.value.display.precision,
-          },
-          startAngle: {
-            label: "Start Angle",
-            input: "number",
-            value: state.value.display.startAngle,
-          },
-          anticlockwise: {
-            label: "Anticlockwise",
-            input: "boolean",
-            value: state.value.display.anticlockwise,
-          },
-          colormap: {
-            label: "Colormap",
-            input: "select",
-            options: colorMaps,
-            value: state.value.display.colormap,
-          },
-          reverseColormap: {
-            label: "Reverse Colormap",
-            input: "boolean",
-            value: state.value.display.reverseColormap,
           },
         },
       },

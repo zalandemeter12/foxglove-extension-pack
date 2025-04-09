@@ -2,7 +2,7 @@
 setlocal enabledelayedexpansion
 
 REM Define targets array
-set targets=common circular-gauge value-display
+set targets=common circular-gauge value-display gg-diagram
 
 REM Save the current directory
 set orig_dir=%cd%

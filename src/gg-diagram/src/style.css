@@ -1,29 +1,18 @@
-circle-progress {
-  display: block;
+gg-diagram {
+  display: flex;
   width: 100%;
   height: 100%;
   max-width: none;
   max-height: none;
   padding: 0.5rem;
   margin: 0;
-}
 
-circle-progress::part(base) {
-  width: 100%;
-  height: 100%;
-}
-circle-progress::part(value) {
-  stroke-width: 1rem;
-  stroke: var(--color);
-  stroke-dasharray: 5.98 2;
-  transition: stroke 0s;
-}
-circle-progress::part(circle) {
-  stroke-width: 0.5rem;
-  stroke: #303030;
-}
-circle-progress::part(text) {
+  /* justify-content: var(--text-align);
+  align-items: center;
+
   font-size: var(--font-size);
-  font-weight: bold;
-  fill: var(--color);
+  font-weight: var(--font-weight);
+  font-style: var(--font-style);
+  color: var(--font-color);
+  background-color: var(--background-color); */
 }

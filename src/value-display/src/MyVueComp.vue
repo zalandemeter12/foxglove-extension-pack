@@ -5,7 +5,6 @@ import { set, merge } from "lodash";
 import { reactive } from "vue";
 import { defaultSettings, updateSettingsEditor } from "./settings.js";
 import * as common from "common";
-import seedrandom from "seedrandom";
 
 export default defineComponent({
   props: {
