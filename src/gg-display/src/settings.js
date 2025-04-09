@@ -70,14 +70,22 @@ const colorMaps = [
 const defaultSettings = {
   data: {
     label: "Data",
-    topic: "",
+    lonTopic: "",
+    latTopic: "",
+    invertLon: false,
+    invertLat: false,
     max: 3,
-    input: "g",
+    input: "m/s2",
   },
   display: {
     label: "Display",
     fontSize: "auto",
-    precision: 0,
+    precision: 1,
+    historySec: 1,
+    markerColor: "#FF0000",
+    historyColor: "#FFA0A0",
+    axisLabels: true,
+    valueLabels: true,
   },
 };
 
@@ -91,13 +99,28 @@ const updateSettingsEditor = (context, state, settingsActionHandler) => {
         // visible: state.value.data.visible,
         icon: "Settings",
         fields: {
-          topic: {
-            label: "Topic",
+          lonTopic: {
+            label: "LonG Topic",
             input: "messagepath",
-            value: state.value.data.topic,
+            value: state.value.data.lonTopic,
+          },
+          latTopic: {
+            label: "LatG Topic",
+            input: "messagepath",
+            value: state.value.data.latTopic,
+          },
+          invertLon: {
+            label: "Invert LonG",
+            input: "boolean",
+            value: state.value.data.invertLon,
+          },
+          invertLat: {
+            label: "Invert LatG",
+            input: "boolean",
+            value: state.value.data.invertLat,
           },
           max: {
-            label: "Max",
+            label: "MaxG",
             input: "number",
             value: state.value.data.max,
           },
@@ -128,6 +151,31 @@ const updateSettingsEditor = (context, state, settingsActionHandler) => {
             label: "Precision",
             input: "number",
             value: state.value.display.precision,
+          },
+          historySec: {
+            label: "History Sec",
+            input: "number",
+            value: state.value.display.historySec,
+          },
+          markerColor: {
+            label: "Marker Color",
+            input: "rgb",
+            value: state.value.display.markerColor,
+          },
+          historyColor: {
+            label: "History Color",
+            input: "rgb",
+            value: state.value.display.historyColor,
+          },
+          axisLabels: {
+            label: "Axis Labels",
+            input: "boolean",
+            value: state.value.display.axisLabels,
+          },
+          valueLabels: {
+            label: "Value Labels",
+            input: "boolean",
+            value: state.value.display.valueLabels,
           },
         },
       },

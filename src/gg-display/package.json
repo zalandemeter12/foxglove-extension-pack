@@ -1,7 +1,7 @@
 {
-  "name": "gg-diagram",
-  "displayName": "GG Diagram",
-  "description": "A GG Diagram for motor sport applications.",
+  "name": "gg-display",
+  "displayName": "GG Display",
+  "description": "A GG Display for motor sport applications.",
   "publisher": "Zalán Demeter",
   "homepage": "https://github.com/zalandemeter12/foxglove-extension-pack",
   "version": "1.0.0",

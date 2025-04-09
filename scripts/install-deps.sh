@@ -2,7 +2,7 @@
 set -e
 
 # Define targets array
-targets=("common" "circular-gauge" "value-display" "gg-diagram")
+targets=("common" "circular-gauge" "value-display" "gg-display")
 
 # Save the current directory
 orig_dir=$(pwd)
