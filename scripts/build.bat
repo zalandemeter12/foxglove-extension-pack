@@ -2,7 +2,7 @@
 setlocal enabledelayedexpansion
 
 REM Define targets array
-set targets=circular-gauge value-display
+set targets=circular-gauge value-display gg-diagram
 @REM set targets=circular-gauge
 
 REM Save the current directory

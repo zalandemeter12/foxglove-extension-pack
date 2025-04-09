@@ -2,7 +2,7 @@
 set -e
 
 # Define targets array
-targets=("circular-gauge" "value-display")
+targets=("circular-gauge" "value-display" "gg-diagram")
 # targets=("circular-gauge")
 
 # Save the current directory
