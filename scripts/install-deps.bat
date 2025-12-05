@@ -1,7 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 
-REM Read targets from scripts\targets.deps if present, otherwise fallback
+REM Read targets from scripts\targets.list if present, otherwise fallback
 set "script_dir=%~dp0"
 set "target_file=%script_dir%targets.list"
 
@@ -9,32 +9,33 @@ REM Save the current directory
 set "orig_dir=%cd%"
 
 if exist "%target_file%" (
-    for /f "usebackq delims=" %%t in ("%target_file%") do (
-        REM skip empty lines and lines starting with #
-        for /f "delims=" %%L in ("%%t") do set "line=%%L"
-        call :trim line
-        if not "!line!"=="" (
-            if not "!line:~0,1!"=="#" (
-                echo Installing dependencies for !line!...
-                cd src\!line!
-                npm install
-                cd %orig_dir%
-            )
-        )
+    for /f "usebackq tokens=* delims= " %%t in ("%target_file%") do (
+        call :process_line "%%t"
     )
 ) else (
     for %%t in (common circular-gauge value-display gg-display) do (
-        echo Installing dependencies for %%t...
-        cd src\%%t
-        npm install
-        cd %orig_dir%
+        call :process_line "%%t"
     )
 )
 
 goto :eof
 
-:trim
-setlocal enabledelayedexpansion
-set "_var=!%1!"
-for /f "tokens=*" %%A in ('echo !_var!') do endlocal & set "%1=%%A"
+:process_line
+set "line=%~1"
+REM skip empty lines and lines starting with #
+if defined line (
+    set "firstchar=!line:~0,1!"
+    if not "!firstchar!"=="#" (
+        if not "!line!"=="" (
+            echo Installing dependencies for !line!...
+            cd /d "%orig_dir%\src\!line!"
+            if exist "package.json" (
+                npm install
+            ) else (
+                echo Warning: package.json not found in src\!line!
+            )
+            cd /d "%orig_dir%"
+        )
+    )
+)
 goto :eof
