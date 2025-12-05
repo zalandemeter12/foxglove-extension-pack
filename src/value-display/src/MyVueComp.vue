@@ -137,7 +137,7 @@ export default defineComponent({
       '--font-weight': state.display.bold ? 'bold' : 'normal',
       '--font-style': state.display.italic ? 'italic' : 'normal',
       '--font-color': displayValue === 'N/A' ? '#303030' : state.display.fontColor,
-      '--background-color': displayValue === 'N/A' ? '#15151A' : state.display.backgroundColor,
+      '--background-color': displayValue === 'N/A' ? '#121212' : state.display.backgroundColor,
       '--text-align': state.display.align,
     }"
   >
