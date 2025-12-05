@@ -4,7 +4,7 @@
   "description": "Package containing common code for the extensions.",
   "publisher": "Zalán Demeter",
   "homepage": "https://github.com/zalandemeter12/foxglove-extension-pack",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "license": "MIT",
   "main": "index.js",
   "keywords": [],
