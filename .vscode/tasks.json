@@ -61,5 +61,35 @@
       "group": { "kind": "none", "isDefault": false },
       "problemMatcher": []
     }
+    {
+      "label": "Clean WIN",
+      "type": "shell",
+      "command": "scripts/clean.bat",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "group": { "kind": "none", "isDefault": false },
+      "problemMatcher": []
+    },
+    {
+      "label": "Clean LINUX",
+      "type": "shell",
+      "command": "scripts/clean.sh",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "group": { "kind": "none", "isDefault": false },
+      "problemMatcher": []
+    }
   ]
 }
