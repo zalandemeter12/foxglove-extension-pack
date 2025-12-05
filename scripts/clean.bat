@@ -1,28 +1,44 @@
 @echo off
-REM Change to repository root (scripts/ is one level down)
+setlocal enabledelayedexpansion
+
+REM Change to repository root
 pushd "%~dp0\.."
 
-echo Removing all node_modules directories (this may take a while)...
+echo Searching for and removing all node_modules and dist directories, and any *.foxe files (this may take a while)...
 
-REM The "dir /s /b /ad node_modules" lists node_modules directories recursively.
-for /f "delims=" %%D in ('dir /s /b /ad node_modules 2^>nul') do (
-  echo Removing "%%D"
-  rd /s /q "%%D"
+REM ---------- Remove node_modules ----------
+dir /s /b /ad node_modules > _nm.txt 2>nul
+if exist _nm.txt (
+    sort /R _nm.txt > _nm_rev.txt
+    for /f "usebackq delims=" %%D in ("_nm_rev.txt") do (
+        echo Removing "%%D"
+        rd /s /q "%%D" 2>nul
+    )
+    del _nm.txt _nm_rev.txt 2>nul
 )
 
-REM Remove dist directories
-for /f "delims=" %%D in ('dir /s /b /ad dist 2^>nul') do (
-  echo Removing dist "%%D"
-  rd /s /q "%%D"
+REM ---------- Remove dist directories ----------
+dir /s /b /ad dist > _dist.txt 2>nul
+if exist _dist.txt (
+    sort /R _dist.txt > _dist_rev.txt
+    for /f "usebackq delims=" %%D in ("_dist_rev.txt") do (
+        echo Removing dist "%%D"
+        rd /s /q "%%D" 2>nul
+    )
+    del _dist.txt _dist_rev.txt 2>nul
 )
 
-REM Remove .foxe files
-for /f "delims=" %%F in ('dir /s /b "*.foxe" 2^>nul') do (
-  echo Deleting file "%%F"
-  del /f /q "%%F"
+REM ---------- Remove .foxe files ----------
+dir /s /b *.foxe > _foxe.txt 2>nul
+if exist _foxe.txt (
+    for /f "usebackq delims=" %%F in ("_foxe.txt") do (
+        echo Deleting file "%%F"
+        del /f /q "%%F" 2>nul
+    )
+    del _foxe.txt 2>nul
 )
 
-echo Done.
+echo Cleanup complete: removed node_modules, dist directories and .foxe files.
+
 popd
-
 exit /b 0

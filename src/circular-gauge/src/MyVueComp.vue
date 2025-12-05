@@ -1,8 +1,7 @@
 <script>
 import { defineComponent, ref, watch, onMounted, onBeforeUnmount } from "vue";
-import { current, produce } from "immer";
+import { produce } from "immer";
 import { set, merge } from "lodash";
-import { reactive } from "vue";
 import CircleProgress from "js-circle-progress";
 import { defaultSettings, updateSettingsEditor } from "./settings.js";
 import * as common from "common";
@@ -18,10 +17,9 @@ export default defineComponent({
     const { context } = props;
     const topics = ref([]);
     const messages = ref([]);
-    const renderDone = ref(null);
     const debugString = ref("");
 
-    const state = ref(merge({}, defaultSettings, context.initialState));
+    const state = ref(merge({}, defaultSettings, context.initialState || {}));
     const currentTopic = ref("");
     const currentField = ref("");
 
@@ -36,12 +34,26 @@ export default defineComponent({
           ) + state.value.display.unit;
     });
 
+    const updateSubscriptions = () => {
+      const { firstPart, lastPart } = common.splitTopic(state.value.data.topic || "");
+      const oldTopic = currentTopic.value;
+      currentTopic.value = firstPart || "";
+      currentField.value = lastPart || "";
+
+      // Only update subscriptions if the topic actually changed
+      if (oldTopic !== firstPart) {
+        context.unsubscribeAll();
+        if (firstPart) {
+          context.subscribe([{ topic: firstPart }]);
+        }
+      }
+    };
+
     const handleRender = (renderState, done) => {
-      renderDone.value = done;
       topics.value = renderState.topics || [];
       messages.value = renderState.currentFrame || [];
 
-      if (currentField.value === undefined) {
+      if (!currentField.value) {
         circleValue.value = 0;
         color.value = "#303030";
       } else if (messages.value.length > 0) {
@@ -61,6 +73,9 @@ export default defineComponent({
           color.value = "#303030";
         }
       }
+
+      // Call done() immediately to signal render completion
+      done();
     };
 
     const settingsActionHandler = (action) => {
@@ -69,9 +84,7 @@ export default defineComponent({
         state.value = produce(state.value, (draft) => set(draft, path, value));
 
         if (path[1] === "topic") {
-          const { firstPart, lastPart } = common.subscribeToTopic(context, value);
-          currentTopic.value = firstPart;
-          currentField.value = lastPart;
+          updateSubscriptions();
         }
 
         if (
@@ -92,29 +105,19 @@ export default defineComponent({
     };
 
     onMounted(() => {
+      // Set up render callback first
       context.onRender = handleRender;
       context.watch("topics");
       context.watch("currentFrame");
-      context.watch("messages");
 
       // Initialize settings editor
       updateSettingsEditor(context, state, settingsActionHandler);
-
-      // Initialize subscriptions
-      const { firstPart, lastPart } = common.subscribeToTopic(context, state.value.data.topic);
-      currentTopic.value = firstPart;
-      currentField.value = lastPart;
+      
+      // Set up subscriptions only if we have a topic
+      if (state.value.data.topic) {
+        updateSubscriptions();
+      }
     });
-
-    watch(
-      () => renderDone.value,
-      (done) => {
-        if (done) {
-          done();
-          renderDone.value = null;
-        }
-      },
-    );
 
     watch([currentField, currentTopic], ([newField, newTopic]) => {
       circleValue.value = 0;
@@ -131,7 +134,6 @@ export default defineComponent({
     );
 
     onBeforeUnmount(() => {
-      const { context } = props;
       context.unsubscribeAll();
     });
 

@@ -13,7 +13,7 @@ const defaultSettings = {
     bold: true,
     italic: false,
     fontColor: "#ffffff",
-    backgroundColor: "#15151A",
+    backgroundColor: "#121212",
   },
   numerical: {
     label: "Numerical",

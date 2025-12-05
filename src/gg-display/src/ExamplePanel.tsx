@@ -4,7 +4,7 @@ import MyVueComp from "./MyVueComp.vue";
 
 export function initExamplePanel(context: PanelExtensionContext): () => void {
   const app = createApp({
-    render: () => h(MyVueComp, { context }), // Correctly pass `context` as a prop
+    render: () => h(MyVueComp, { context }),
   });
 
   app.mount(context.panelElement);

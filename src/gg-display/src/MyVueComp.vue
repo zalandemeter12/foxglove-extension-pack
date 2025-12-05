@@ -1,8 +1,7 @@
 <script>
 import { defineComponent, ref, watch, onMounted, onBeforeUnmount } from "vue";
-import { current, produce } from "immer";
+import { produce } from "immer";
 import { set, merge } from "lodash";
-import { reactive } from "vue";
 import { defaultSettings, updateSettingsEditor } from "./settings.js";
 import * as common from "common";
 
@@ -17,10 +16,9 @@ export default defineComponent({
     const { context } = props;
     const topics = ref([]);
     const messages = ref([]);
-    const renderDone = ref(null);
     const debugString = ref("");
 
-    const state = ref(merge({}, defaultSettings, context.initialState));
+    const state = ref(merge({}, defaultSettings, context.initialState || {}));
 
     const currentLonTopic = ref("");
     const currentLonField = ref("");
@@ -46,6 +44,7 @@ export default defineComponent({
     // Store the original G values, not the screen coordinates
     const positionHistory = ref([]);
     let historyTimer = null;
+    let sizeObserverInitialized = false;
 
     // Function to calculate the current signal frequency
     const updateFrequency = (isLat, timestamp) => {
@@ -90,14 +89,44 @@ export default defineComponent({
       return Math.ceil(((highestFreq * state.value.display.historySec * 1000) / 1000) * 1.1);
     };
 
+    const updateSubscriptions = () => {
+      const subscriptions = [];
+      const { firstPart: lonTopic, lastPart: lonField } = common.splitTopic(
+        state.value.data.lonTopic || "",
+      );
+      const oldLonTopic = currentLonTopic.value;
+      currentLonTopic.value = lonTopic || "";
+      currentLonField.value = lonField || "";
+      if (lonTopic) {
+        subscriptions.push({ topic: lonTopic });
+      }
+
+      const { firstPart: latTopic, lastPart: latField } = common.splitTopic(
+        state.value.data.latTopic || "",
+      );
+      const oldLatTopic = currentLatTopic.value;
+      currentLatTopic.value = latTopic || "";
+      currentLatField.value = latField || "";
+      if (latTopic) {
+        subscriptions.push({ topic: latTopic });
+      }
+
+      // Only update subscriptions if topics actually changed
+      if (oldLonTopic !== lonTopic || oldLatTopic !== latTopic) {
+        context.unsubscribeAll();
+        if (subscriptions.length > 0) {
+          context.subscribe(subscriptions);
+        }
+      }
+    };
+
     const handleRender = (renderState, done) => {
-      renderDone.value = done;
       topics.value = renderState.topics || [];
       messages.value = renderState.currentFrame || [];
 
       const currentTimestamp = Date.now();
 
-      if (currentLonField.value === undefined) {
+      if (!currentLonField.value) {
         lonG.value = 0;
       } else if (messages.value.length > 0) {
         const value = common.parseValue(messages.value[0].message, currentLonField.value);
@@ -108,14 +137,13 @@ export default defineComponent({
           } else if (state.value.data.input == "m/s2") {
             lonG.value = (sign * value) / 9.81; // Convert to g
           }
-          // Update longitude frequency
           updateFrequency(false, currentTimestamp);
         } else {
           lonG.value = 0;
         }
       }
 
-      if (currentLatField.value === undefined) {
+      if (!currentLatField.value) {
         latG.value = 0;
       } else if (messages.value.length > 0) {
         const value = common.parseValue(messages.value[0].message, currentLatField.value);
@@ -126,14 +154,19 @@ export default defineComponent({
           } else if (state.value.data.input == "m/s2") {
             latG.value = (sign * value) / 9.81; // Convert to g
           }
-          // Update latitude frequency
           updateFrequency(true, currentTimestamp);
         } else {
           latG.value = 0;
         }
       }
 
-      common.getWidthHeight(width, height, randomDivClass);
+      if (!sizeObserverInitialized) {
+        common.getWidthHeight(width, height, randomDivClass);
+        sizeObserverInitialized = true;
+      }
+
+      // Call done() immediately to signal render completion
+      done();
     };
 
     // Function to capture the current position for the trail
@@ -175,57 +208,33 @@ export default defineComponent({
         const { path, value } = action.payload;
         state.value = produce(state.value, (draft) => set(draft, path, value));
 
-        if (path[1] === "lonTopic") {
-          const { firstPart, lastPart } = common.subscribeToTopic(context, value);
-          currentLonTopic.value = firstPart;
-          currentLonField.value = lastPart;
-        }
-
-        if (path[1] === "latTopic") {
-          const { firstPart, lastPart } = common.subscribeToTopic(context, value);
-          currentLatTopic.value = firstPart;
-          currentLatField.value = lastPart;
+        if (path[1] === "lonTopic" || path[1] === "latTopic") {
+          updateSubscriptions();
         }
       }
     };
 
     onMounted(() => {
+      // Set up render callback first
       context.onRender = handleRender;
       context.watch("topics");
       context.watch("currentFrame");
-      context.watch("messages");
 
       // Initialize settings editor
       updateSettingsEditor(context, state, settingsActionHandler);
+      
+      // Set up subscriptions only if we have topics
+      if (state.value.data.lonTopic || state.value.data.latTopic) {
+        updateSubscriptions();
+      }
 
-      // Initialize subscriptions
-      const { firstPart: lonFirstPart, lastPart: lonLastPart } = common.subscribeToTopic(
-        context,
-        state.value.data.lonTopic,
-      );
-      currentLonTopic.value = lonFirstPart;
-      currentLonField.value = lonLastPart;
+      if (!sizeObserverInitialized) {
+        common.getWidthHeight(width, height, randomDivClass);
+        sizeObserverInitialized = true;
+      }
 
-      const { firstPart: latFirstPart, lastPart: latLastPart } = common.subscribeToTopic(
-        context,
-        state.value.data.latTopic,
-      );
-      currentLatTopic.value = latFirstPart;
-      currentLatField.value = latLastPart;
-
-      // Start history tracker for the trail effect
       historyTimer = setInterval(capturePosition, 50); // Capture position every 50ms
     });
-
-    watch(
-      () => renderDone.value,
-      (done) => {
-        if (done) {
-          done();
-          renderDone.value = null;
-        }
-      },
-    );
 
     watch([currentLonField, currentLonTopic], ([newField, newTopic]) => {
       lonG.value = 0;
@@ -251,10 +260,8 @@ export default defineComponent({
     );
 
     onBeforeUnmount(() => {
-      const { context } = props;
       context.unsubscribeAll();
 
-      // Clean up the history timer
       if (historyTimer) {
         clearInterval(historyTimer);
         historyTimer = null;
